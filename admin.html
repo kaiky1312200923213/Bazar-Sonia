@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel da loja — Bazar da Sônia</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { background: var(--creme); }
+  .admin-wrap { max-width: 880px; margin: 0 auto; padding: 28px 20px 80px; }
+
+  .admin-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 26px; flex-wrap: wrap; gap: 12px;
+  }
+  .admin-header h1 { font-size: 24px; color: var(--rosa-escuro); }
+  .btn-sair {
+    background: var(--branco); color: var(--roxo-claro); font-weight: 800;
+    padding: 10px 18px; border-radius: 50px; box-shadow: var(--sombra); font-size: 14px;
+  }
+
+  /* Login */
+  .login-box {
+    max-width: 380px; margin: 80px auto; background: var(--branco);
+    border-radius: 28px; padding: 40px 32px; box-shadow: var(--sombra-forte);
+    text-align: center;
+  }
+  .login-box svg { width: 64px; margin-bottom: 14px; }
+  .login-box h1 { font-size: 22px; color: var(--roxo); margin-bottom: 6px; }
+  .login-box p { color: var(--roxo-claro); font-weight: 600; font-size: 14px; margin-bottom: 24px; }
+
+  .campo { margin-bottom: 16px; text-align: left; }
+  .campo label { display: block; font-weight: 800; font-size: 13px; color: var(--roxo); margin-bottom: 6px; }
+  .campo input, .campo textarea {
+    width: 100%; padding: 13px 16px; border-radius: 14px; border: 2px solid #EDE6F7;
+    font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 600; color: var(--roxo);
+    background: #FAF8FD;
+  }
+  .campo input:focus, .campo textarea:focus { border-color: var(--rosa); outline: none; }
+
+  .btn-principal {
+    width: 100%; background: var(--rosa); color: var(--branco); font-weight: 800;
+    font-size: 16px; padding: 15px; border-radius: 16px; box-shadow: 0 8px 20px rgba(255,77,141,0.35);
+    transition: transform .15s;
+  }
+  .btn-principal:hover { transform: translateY(-2px); }
+  .btn-principal:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .erro-msg {
+    background: #FFE9EE; color: #C81E4E; font-weight: 700; font-size: 13px;
+    padding: 10px 14px; border-radius: 12px; margin-bottom: 16px; display: none;
+  }
+  .sucesso-msg {
+    background: #E4F8EA; color: #1F8B43; font-weight: 700; font-size: 13px;
+    padding: 10px 14px; border-radius: 12px; margin-bottom: 16px; display: none;
+  }
+
+  /* Painel */
+  .card-form {
+    background: var(--branco); border-radius: 24px; padding: 28px; box-shadow: var(--sombra);
+    margin-bottom: 32px;
+  }
+  .card-form h2 { font-size: 19px; color: var(--roxo); margin-bottom: 18px; }
+
+  .linha-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 560px) { .linha-2 { grid-template-columns: 1fr; } }
+
+  .upload-area {
+    border: 2.5px dashed #E3D9F5; border-radius: 16px; padding: 20px; text-align: center;
+    cursor: pointer; background: #FAF8FD; transition: border-color .2s;
+  }
+  .upload-area:hover { border-color: var(--rosa); }
+  .upload-area input[type=file] { display: none; }
+  .preview-imagem { max-width: 140px; border-radius: 12px; margin: 0 auto 10px; display: none; }
+
+  .lista-produtos { display: flex; flex-direction: column; gap: 14px; }
+  .item-produto {
+    display: flex; align-items: center; gap: 16px; background: var(--branco);
+    border-radius: 18px; padding: 14px 18px; box-shadow: var(--sombra);
+  }
+  .item-produto img { width: 64px; height: 64px; object-fit: cover; border-radius: 12px; flex-shrink: 0; }
+  .item-info { flex: 1; min-width: 0; }
+  .item-nome { font-family: 'Baloo 2', cursive; font-size: 16px; color: var(--roxo); }
+  .item-preco { color: var(--rosa-escuro); font-weight: 800; font-size: 14px; }
+  .item-acoes { display: flex; gap: 8px; }
+  .btn-icone {
+    width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; background: #F3EFFA; color: var(--roxo-claro); flex-shrink: 0;
+  }
+  .btn-icone.excluir { background: #FFE9EE; color: #C81E4E; }
+  .btn-icone:hover { filter: brightness(0.95); }
+
+  .vazio-lista { text-align: center; padding: 40px 20px; color: var(--roxo-claro); font-weight: 600; }
+  .spinner { width: 18px; height: 18px; border: 3px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: girar 0.7s linear infinite; display: inline-block; vertical-align: middle; margin-right: 8px; }
+  @keyframes girar { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- ===== Tela de login ===== -->
+<div class="login-box" id="loginBox">
+  <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <circle cx="30" cy="30" r="28" fill="#FF4D8D"/>
+    <circle cx="30" cy="30" r="28" fill="none" stroke="#FFC93C" stroke-width="3" stroke-dasharray="6 6"/>
+    <text x="30" y="39" font-family="Baloo 2, cursive" font-size="26" font-weight="700" fill="#fff" text-anchor="middle">S</text>
+  </svg>
+  <h1>Painel da Sônia</h1>
+  <p>Entre para cadastrar os produtos da loja</p>
+
+  <div class="erro-msg" id="loginErro"></div>
+
+  <form id="formLogin">
+    <div class="campo">
+      <label for="loginEmail">E-mail</label>
+      <input type="email" id="loginEmail" required autocomplete="username">
+    </div>
+    <div class="campo">
+      <label for="loginSenha">Senha</label>
+      <input type="password" id="loginSenha" required autocomplete="current-password">
+    </div>
+    <button type="submit" class="btn-principal" id="btnLogin">Entrar</button>
+  </form>
+</div>
+
+<!-- ===== Painel (depois do login) ===== -->
+<div class="admin-wrap" id="painelAdmin" style="display:none;">
+  <div class="admin-header">
+    <h1>Olá, Sônia! 👋</h1>
+    <button class="btn-sair" id="btnSair">Sair</button>
+  </div>
+
+  <div class="card-form">
+    <h2 id="tituloForm">Cadastrar novo produto</h2>
+    <div class="erro-msg" id="formErro"></div>
+    <div class="sucesso-msg" id="formSucesso"></div>
+
+    <form id="formProduto">
+      <input type="hidden" id="produtoId">
+
+      <div class="campo">
+        <label for="campoNome">Nome do produto</label>
+        <input type="text" id="campoNome" placeholder="Ex: Conjunto de panelas antiaderente" required maxlength="60">
+      </div>
+
+      <div class="linha-2">
+        <div class="campo">
+          <label for="campoPreco">Preço (R$)</label>
+          <input type="number" id="campoPreco" placeholder="Ex: 89.90" step="0.01" min="0" required>
+        </div>
+        <div class="campo">
+          <label for="campoNovo">Marcar como novidade?</label>
+          <select id="campoNovo" style="width:100%; padding:13px 16px; border-radius:14px; border:2px solid #EDE6F7; font-weight:600; font-size:15px; background:#FAF8FD; color:var(--roxo);">
+            <option value="nao">Não</option>
+            <option value="sim">Sim, é novidade ✨</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Foto do produto</label>
+        <label class="upload-area" for="campoImagem">
+          <img id="previewImagem" class="preview-imagem" alt="Pré-visualização da foto do produto">
+          <div id="textoUpload">📷 Toque aqui para escolher uma foto</div>
+        </label>
+        <input type="file" id="campoImagem" accept="image/*">
+      </div>
+
+      <button type="submit" class="btn-principal" id="btnSalvarProduto">Cadastrar produto</button>
+      <button type="button" class="btn-sair" id="btnCancelarEdicao" style="width:100%; margin-top:10px; display:none;">Cancelar edição</button>
+    </form>
+  </div>
+
+  <h2 style="font-size:19px; color:var(--roxo); margin-bottom:16px;">Produtos cadastrados</h2>
+  <div class="lista-produtos" id="listaProdutos">
+    <div class="vazio-lista">Carregando produtos...</div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

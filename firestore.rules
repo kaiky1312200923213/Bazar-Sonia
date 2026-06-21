@@ -1,0 +1,19 @@
+// ============================================================
+// REGRAS DE SEGURANÇA DO FIRESTORE — Bazar da Sônia
+// Cole este conteúdo em: Firebase Console > Firestore Database > Regras
+// (passo 4 do GUIA-PASSO-A-PASSO.md)
+// ============================================================
+// O que isso faz:
+// - Qualquer pessoa pode VER os produtos (leitura pública)
+// - SÓ quem estiver logado (a Sônia) pode criar, editar ou excluir produtos
+// ============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /produtos/{produtoId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}
